@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "wio_exporter"
+version = "0.1.0"
+description = "Export transaction history from Wio banking app to CSV using Appium"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "wio_exporter"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+appium-python-client = "^4.2.1"
+pandas = "^2.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
