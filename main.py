@@ -1,17 +1,13 @@
-#!/usr/bin/env python3
-"""Main entry point for Wio transaction exporter."""
-
 import logging
 import sys
 from appium import webdriver
 from appium.options.ios import XCUITestOptions
 
-from wio_exporter.config import default_config, default_locators
+from wio_exporter.config import default_config
 from wio_exporter.scraper import TransactionScraper
 from wio_exporter.exporter import CSVExporter
 
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -20,7 +16,6 @@ logging.basicConfig(
     ],
 )
 
-# Disable verbose Selenium/urllib3 logging
 logging.getLogger("selenium").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
@@ -28,31 +23,25 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    """Main execution function."""
     logger.info("Starting Wio Transaction Exporter")
 
     driver = None
 
     try:
-        # Initialize Appium driver
         logger.info(f"Connecting to Appium server at {default_config.appium_server_url}")
 
-        # Convert capabilities to XCUITestOptions
         options = XCUITestOptions()
         caps = default_config.to_capabilities()
 
-        # Set capabilities
         options.platform_name = caps["platformName"]
         options.device_name = caps["appium:deviceName"]
         options.udid = caps["appium:udid"]
         options.automation_name = caps["appium:automationName"]
         options.new_command_timeout = caps["appium:newCommandTimeout"]
 
-        # Additional options
         options.set_capability("appium:includeSafariInWebviews", caps["appium:includeSafariInWebviews"])
         options.set_capability("appium:connectHardwareKeyboard", caps["appium:connectHardwareKeyboard"])
 
-        # Connect to existing session (app should be already open on transactions screen)
         driver = webdriver.Remote(
             default_config.appium_server_url,
             options=options
@@ -60,10 +49,8 @@ def main():
 
         logger.info("Connected to device successfully")
 
-        # Initialize scraper
-        scraper = TransactionScraper(driver, default_locators)
+        scraper = TransactionScraper(driver)
 
-        # Scrape transactions
         logger.info("Starting transaction extraction...")
         transactions = scraper.scrape_all_transactions()
 
@@ -71,7 +58,6 @@ def main():
             logger.warning("No spending transactions found!")
             return
 
-        # Export to CSV
         exporter = CSVExporter()
         output_file = exporter.export(transactions)
 
